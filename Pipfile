@@ -1,0 +1,24 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+langchain = "*"
+beautifulsoup4 = "*"
+tiktoken = "*"
+openai = "*"
+pinecone-client = "*"
+unstructured = "*"
+nltk = "*"
+fastapi = "*"
+jinja2 = "*"
+uvicorn = "*"
+streamlit = "*"
+streamlit-chat = "*"
+tqdm = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.10"
