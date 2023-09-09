@@ -9,6 +9,7 @@ from langchain.vectorstores import Pinecone
 
 import os
 import pinecone
+from consts import INDEX_NAME
 
 # initialize pinecone client
 pinecone.init(api_key=os.environ["PINECONE_API_KEY"],
@@ -37,7 +38,10 @@ def ingest_docs() -> None:
     documents = text_splitter.split_documents(documents=raw_documents)
 
     print(f"Split {len(documents)} documents into chunks")
+
     # Simple dictionary manipulation to change the source path of the documents, to a valid url.
+    # This will enable us later to access what vectors (pages of langchain in this case) the RetrievalQA
+    # chain sent to the LLM as a "relveant" context.
     for doc in documents:
         old_path = doc.metadata["source"]
         new_url = old_path.replace("langchain-docs", "https:/")
@@ -49,7 +53,7 @@ def ingest_docs() -> None:
 
     # Take the chunks, imbed them into vectors and store them in the Pinecone vector database.
     Pinecone.from_documents(documents,
-                            embeddings, index_name="langchain-docs-index")
+                            embeddings, index_name=INDEX_NAME)
     print("*********Added documents to Pinecone*********")
 
 
