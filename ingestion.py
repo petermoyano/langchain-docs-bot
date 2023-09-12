@@ -22,29 +22,31 @@ pinecone.init(api_key=os.environ["PINECONE_API_KEY"],
 
 
 def ingest_docs() -> None:
-    # The ReadTheDocsLoader is a class that is in charge of taking the dump of some scrapped data
-    # fetching process and loading it into the vectorstore.
-    loader = ReadTheDocsLoader("langchain-docs/")
-    # The load methos returns a list of documents, which are the objects that are going to be
-    # raw_documents is a list of dictionaries, each dictionary represents a document object.
+    # The ReadTheDocsLoader is a class that is in charge of taking the dump of some scrapped data-fetching
+    #  process and loading it into the vectorstore.
+    loader = ReadTheDocsLoader(
+        "langchain-docs/langchain.readthedocs.io/en/latest/"
+    )
+
+    # loader.load() -> [documents] (documents are just dictionaries)
     raw_documents = loader.load()
+
     print(f"Loaded {len(raw_documents)} documents")
-    # gpt-3.5-turbo has a 4096 token limit (query + result), so we need to split the documents into chunks.
-    # A good rule of thumb is to split the documents into 5 chunks
+
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=1000, chunk_overlap=100, separators=["\n\n", "\n", " ", ""])
 
-    # Take the langchain raw documents and split them into chunks.
+    # Execute splitter, to allow parallelization of the embedding process.
     documents = text_splitter.split_documents(documents=raw_documents)
 
     print(f"Split {len(documents)} documents into chunks")
 
-    # Simple dictionary manipulation to change the source path of the documents, to a valid url.
-    # This will enable us later to access what vectors (pages of langchain in this case) the RetrievalQA
-    # chain sent to the LLM as a "relveant" context.
+    # Simple dictionary manipulation to change the source path of the documents, to a valid langchain docs page.
+    # This will enable us later to have easy access to the "relevant" context. (proximity search)
     for doc in documents:
         old_path = doc.metadata["source"]
-        new_url = old_path.replace("langchain-docs", "https:/")
+        new_url = old_path.replace(
+            "langchain-docs/", "https:/")
         doc.metadata.update({"source": new_url})
 
     print(f"Uploading {len(documents)} documents to vectorstore (pinecone)")

@@ -35,7 +35,7 @@ if prompt:
              ]
         )
         formatted_response = (
-            f"{generated_response['result']} \n\n Sources: {create_sources_string(sources)}"
+            f"{generated_response['result']}"
         )
 
         # Add the user's prompt and the chatbot's response to the session state variables.
