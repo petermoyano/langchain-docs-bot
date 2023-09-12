@@ -3,8 +3,9 @@ import streamlit as st
 from streamlit_chat import message
 from typing import Set
 
-st.header("Peter's LangChain chatbot")
-prompt = st.text_input("Ask me anything about LangChain", placeholder="...")
+st.header("Peter's LangChain documentation chatbot")
+st.subheader("GPT-3.5-turbo + the entire LangChain documentation")
+prompt = st.text_input("You can also ask for code.", placeholder="")
 
 # Initialize session state variables if they don't exist yet.
 if "user_prompt_history" not in st.session_state:
