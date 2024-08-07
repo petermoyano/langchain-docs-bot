@@ -1,0 +1,14 @@
+{
+  "name": "scraper",
+  "version": "1.0.0",
+  "description": "web scraper",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "puppeteer": "^23.0.1"
+  }
+}

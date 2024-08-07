@@ -1,4 +1,5 @@
-.env
-/langchain-docs
-__pycache__/
+/processor/.env
+/processor/langchain-docs
+/processor/__pycache__/
 .vscode/
+/scraper/node_modules/
