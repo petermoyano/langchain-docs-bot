@@ -1,3 +1,4 @@
 .env
 /langchain-docs
 __pycache__/
+.vscode/
