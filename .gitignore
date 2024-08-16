@@ -5,4 +5,5 @@
 /scraper/node_modules/
 /processor/next-docs-raw-data/
 /processor/react-docs-raw-data/
+/scraper/parsed-docs
 .env

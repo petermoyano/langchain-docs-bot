@@ -1,15 +1,7 @@
----
-title: Langchain Docs
-emoji: 👁
-colorFrom: green
-colorTo: red
-sdk: streamlit
-sdk_version: 1.26.0
-app_file: app.py
-pinned: false
----
 
 This project is meant to be a simple example of how to use R.A.G. with a Pinecone datastore to store and retrieve vectors. It uses the Pinecone API to store vectors of documents (docs HTML files) and then retrieve the most similar documents to a user's query. The vectors are created with the dump, after scraping the documentations sites of the MERN stack.
+
+The scraping part is in the scraper folder, while the rest of the logic is in the processor folder.
 
 This app is available at huggingface spaces [here.](https://huggingface.co/spaces/Petermoyano/langchain-docs)
 
