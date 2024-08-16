@@ -1,5 +1,8 @@
 /processor/.env
-/processor/langchain-docs
+/processor/langchain-docs-raw-data/
 /processor/__pycache__/
 .vscode/
 /scraper/node_modules/
+/processor/next-docs-raw-data/
+/processor/react-docs-raw-data/
+.env

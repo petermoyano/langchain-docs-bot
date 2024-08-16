@@ -1,63 +1,82 @@
-"""
-This file es responsible for the ingestion of the data (langchain documentation).
-It embedds the data into vectors, and stores it in the pinecone vectorstore.
-"""
-from langchain.document_loaders import ReadTheDocsLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.vectorstores import Pinecone
-
 import os
-import pinecone
+import sys
+from dotenv import load_dotenv
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import BSHTMLLoader
+from langchain_openai import OpenAIEmbeddings
+from langchain_pinecone import PineconeVectorStore
+from pinecone import Pinecone as PineconeClient, ServerlessSpec
+
 from consts import INDEX_NAME
 
-# initialize pinecone client
-pinecone.init(api_key=os.environ["PINECONE_API_KEY"],
-              environment=os.environ["PINECONE_ENVIRONMENT"])
+# Load environment variables from .env file
+load_dotenv()
 
-# The ingestion process is divided into 3 steps:
-# 1. Load the documents from the source (ReadTheDocsLoader)
-# 2. Split the documents into chunks (RecursiveCharacterTextSplitter)
-# 3. Embed the chunks into vectors and store them in the vectorstore (Pinecone.from_documents)
+def load_html_files(directory):
+    documents = []
+    for filename in os.listdir(directory):
+        if filename.endswith(".html"):
+            filepath = os.path.join(directory, filename)
+            loader = BSHTMLLoader(filepath)
+            documents.extend(loader.load())
+    return documents
 
+def ingest_docs(doc_type: str) -> None:
+    # Initialize Pinecone client
+    pc = PineconeClient(api_key=os.environ["PINECONE_API_KEY"], environment=os.environ["PINECONE_ENVIRONMENT"])
 
-def ingest_docs() -> None:
-    # The ReadTheDocsLoader is a class that is in charge of taking the dump of some scrapped data-fetching
-    #  process and loading it into the vectorstore.
-    loader = ReadTheDocsLoader(
-        "langchain-docs/langchain.readthedocs.io/en/latest/"
-    )
+    # Ensure the index exists
+    if INDEX_NAME not in pc.list_indexes():
+        pc.create_index(
+            name=INDEX_NAME,
+            dimension=1536,
+            metric='euclidean',
+            spec=ServerlessSpec(
+                cloud='gcp',
+                region='us-central1'
+            )
+        )
 
-    # loader.load() -> [documents] (documents are just dictionaries)
-    raw_documents = loader.load()
+    pinecone_index = pc.Index(INDEX_NAME)
 
-    print(f"Loaded {len(raw_documents)} documents")
+    # Determine the source path based on the doc_type argument
+    if doc_type == "Next":
+        source_path = "next-docs-raw-data/"
+    elif doc_type == "React":
+        source_path = "react-docs-raw-data/"
+    elif doc_type == "Express":
+        source_path = "express-docs-raw-data/"
+    else:
+        raise ValueError(f"Unsupported doc_type: {doc_type}")
 
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1000, chunk_overlap=100, separators=["\n\n", "\n", " ", ""])
+    # Load raw documents
+    raw_documents = load_html_files(source_path)
+    print(f"Loaded {len(raw_documents)} documents from {source_path}")
 
-    # Execute splitter, to allow parallelization of the embedding process.
+    # Split documents into chunks
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100, separators=["\n\n", "\n", " ", ""])
     documents = text_splitter.split_documents(documents=raw_documents)
-
     print(f"Split {len(documents)} documents into chunks")
 
-    # Simple dictionary manipulation to change the source path of the documents, to a valid langchain docs page.
-    # This will enable us later to have easy access to the "relevant" context. (proximity search)
+    # Update document metadata
     for doc in documents:
         old_path = doc.metadata["source"]
-        new_url = old_path.replace(
-            "langchain-docs/", "https:/")
-        doc.metadata.update({"source": new_url})
+        new_url = old_path.replace(source_path, "https://")
+        doc.metadata.update({"source": new_url, "type": doc_type})
 
-    print(f"Uploading {len(documents)} documents to vectorstore (pinecone)")
-    # The embeddings object is in charge of embedding the documents into vectors.
+    # Embed and upload documents to Pinecone
     embeddings = OpenAIEmbeddings()
-
-    # Take the chunks, imbed them into vectors and store them in the Pinecone vector database.
-    Pinecone.from_documents(documents,
-                            embeddings, index_name=INDEX_NAME)
-    print("*********Added documents to Pinecone*********")
-
+    vector_store = PineconeVectorStore.from_documents(
+        docs=documents,
+        index_name=INDEX_NAME,
+        embedding=embeddings
+    )
+    print(f"Uploaded {len(documents)} documents to Pinecone")
 
 if __name__ == '__main__':
-    ingest_docs()
+    if len(sys.argv) != 2:
+        print("Usage: python ingestion.py <doc_type>")
+        sys.exit(1)
+
+    doc_type = sys.argv[1]
+    ingest_docs(doc_type)
