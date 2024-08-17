@@ -15,7 +15,7 @@ node scraper/scrape_docs.js <url-of-docs-to-scrape>
 
 
 # Personal notes
-## 1 Envirnoment Setup
+## Envirnoment Setup
 - Create Pinecone Index
 - .env
 - Vector Size considerations. 1 vector is 768 to 1024 dimensions. Each dimension is a float (4 bytes)
@@ -36,7 +36,7 @@ Total Size:
 
 Total size=34,516 records×6144 bytes=211,599,744 bytes≈211.6 MB
 
-## 2. Pinecone Index
+## Pinecone Index
 - Check unique metadata: The metadata for each document chunk should include identifiers that distinguish between different document sources. This prevents any accidental overwriting.
 
 ## Possible next improvments
@@ -56,3 +56,12 @@ Total size=34,516 records×6144 bytes=211,599,744 bytes≈211.6 MB
 
     Question: {user_question}
     """
+
+## Selecting the right tool for codebases
+Openai's Codex seems to be worst than GPT4.
+Microsoft CodeBert: Supports bidirectional context (it considers both the preceding and succeeding tokens in a sequence).
+GraphCodeBert: It uses a graph-based representation of code to capture the structural information of the code.
+CuBERT: Designed for Python.
+
+## Sales pitch
+It's important to start now because LLMs responses are non-deterministic, which means trile & error is required to get the right answer. This is a time-consuming process. The lessons learned here could be useful for a future ai-laba-like project.
