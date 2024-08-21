@@ -65,3 +65,11 @@ CuBERT: Designed for Python.
 
 ## Sales pitch
 It's important to start now because LLMs responses are non-deterministic, which means trile & error is required to get the right answer. This is a time-consuming process. The lessons learned here could be useful for a future ai-laba-like project.
+
+## Metadata automatic extraction and filtering tool
+We can use LlamaExtract and LlamaIndex to improve the metadata build up. It even uses a schema! Great possible improvement point.
+
+We should add a .gitignore logic to avoid scraping or uploading to much files. After
+
+## Going agentic
+Maybe the place to start is testing the app, once the suggestion has been made. If the app throws an error, return it to the LLM and suggest again, taking that into account. Else, return the answer to the user.
