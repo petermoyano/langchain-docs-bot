@@ -1,3 +1,6 @@
+// DEPRECATED
+// The functionality present is this file is only meant for the propper build up and supervision of the codebase metadata.
+// It's meant to be placed in the root of the codebase and run to generate the metadata JSON file.
 const fs = require('fs');
 const path = require('path');
 const ignore = require('ignore');
@@ -18,16 +21,20 @@ const languageMap = {
   '.css': 'CSS',
   '.json': 'JSON',
   '.txt': 'Text',
+  '.md': 'Markdown',
+  '.gitattributes': 'Git',
+  '.prettierrc': 'JSON',
+  'Pipfile': 'Python',
+  'Pipfile.lock': 'Python',
+  '.prettierrc': 'JSON',
 };
 
 function getLanguage(filePath) {
   const ext = path.extname(filePath);
-  if (!languageMap[ext]) {
-    throw new Error(`Unknown language for file: ${filePath}`);
-  }
   return languageMap[ext] || 'Unknown';
 }
 
+// Function to load and parse the .gitignore file using the ignore library
 function loadGitignore(gitignorePath) {
   try {
     const gitignoreContent = fs.readFileSync(gitignorePath, 'utf-8');
@@ -43,7 +50,7 @@ function collectFileMetadata(filePath) {
     const stats = fs.statSync(filePath);
     const metadata = {
       fileName: path.basename(filePath),
-      filePath: path.relative(process.cwd(), filePath), // Relative path
+      filePath: path.relative(process.cwd(), filePath),
       lastModified: stats.mtime,
       fileSize: stats.size,
       language: getLanguage(filePath),
@@ -61,8 +68,10 @@ function collectCodebaseMetadata(dirPath) {
   const gitignorePath = path.join(dirPath, '.gitignore');
   const ig = loadGitignore(gitignorePath);
   let allMetadata = [];
+  let fileCount = 0;
+  const directoryFileCounts = {};
 
-  function traverse(currentPath) {
+  function traverse(currentPath, depth = 0) {
     try {
       const files = fs.readdirSync(currentPath);
 
@@ -71,15 +80,21 @@ function collectCodebaseMetadata(dirPath) {
         const relativePath = path.relative(dirPath, fullPath);
         const stats = fs.statSync(fullPath);
 
+        // Use the ignore library to check if the file should be ignored
         if (ig.ignores(relativePath)) {
+          console.log(`Ignored: ${relativePath}`);
           return;
         }
 
         if (stats.isDirectory()) {
-          traverse(fullPath);
+          traverse(fullPath, depth + 1);
         } else if (stats.isFile()) {
           const fileMetadata = collectFileMetadata(fullPath);
           allMetadata.push(fileMetadata);
+          fileCount++;
+
+          const directory = depth === 0 ? 'root' : path.dirname(relativePath);
+          directoryFileCounts[directory] = (directoryFileCounts[directory] || 0) + 1;
         }
       });
     } catch (err) {
@@ -89,6 +104,13 @@ function collectCodebaseMetadata(dirPath) {
   }
 
   traverse(dirPath);
+
+  console.log(`Total files processed for metadata: ${fileCount}`);
+  console.log('Files processed per directory:');
+  for (const [directory, count] of Object.entries(directoryFileCounts)) {
+    console.log(`${directory}: ${count}`);
+  }
+
   return allMetadata;
 }
 

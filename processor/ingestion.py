@@ -9,7 +9,6 @@ from pinecone import Pinecone as PineconeClient, ServerlessSpec
 
 from consts import INDEX_NAME
 
-# Load environment variables from .env file
 load_dotenv()
 
 def load_html_files(directory):
@@ -40,7 +39,7 @@ def ingest_docs(doc_type: str) -> None:
     pinecone_index = pc.Index(INDEX_NAME)
 
     # Determine the source path based on the doc_type argument
-    if doc_type == "Next":
+    if doc_type == "Nextjs":
         source_path = "next-docs-raw-data/"
     elif doc_type == "React":
         source_path = "react-docs-raw-data/"

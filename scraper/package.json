@@ -1,12 +1,13 @@
 {
   "name": "scraper",
   "version": "1.0.0",
-  "description": "web scraper",
+  "description": "ai-coder-helper",
   "main": "index.js",
   "scripts": {
     "test": "test"
   },
-  "author": "",
+  "type": "module",
+  "author": "Pedro Moyano",
   "license": "ISC",
   "dependencies": {
     "cheerio": "^1.0.0",

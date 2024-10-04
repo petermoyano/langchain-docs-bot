@@ -3,7 +3,14 @@
 /processor/__pycache__/
 .vscode/
 /scraper/node_modules/
-/processor/next-docs-raw-data/
+/processor/nextjs-docs-raw-data/
+processor/nextjs-docs-raw-data
 /processor/react-docs-raw-data/
-/scraper/parsed-docs
+/processor/llamaindex-docs-raw-data/
+/processor/sdk.vercel.ai-docs-raw-data/
+/scraper/parsed-docs/
 .env
+/processor/parsed-docs/
+/processor/cleaned-docs/
+.venv/
+venv/

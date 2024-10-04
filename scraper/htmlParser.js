@@ -1,10 +1,15 @@
-const fs = require('fs');
-const path = require('path');
-const cheerio = require('cheerio');
+import fs from 'fs';
+import path from 'path';
+import * as cheerio from 'cheerio';
+import { fileURLToPath } from 'url';
 
-const rootDirectory = '/home/peter/chatbots/langchain-docs-chatbot/processor/react-docs-raw-data/';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-const outputDirectory = '/home/peter/chatbots/langchain-docs-chatbot/scraper/parsed-docs/';
+const framework = 'nextjs';
+
+const rootDirectory = path.join(__dirname, '..', 'processor', `${framework}-docs-raw-data`);
+const outputDirectory = path.join(__dirname, '..', 'processor', 'parsed-docs', `parsed-${framework}-docs`);
 
 if (!fs.existsSync(outputDirectory)) {
   fs.mkdirSync(outputDirectory, { recursive: true });
