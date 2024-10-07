@@ -1,21 +1,17 @@
-import { Octokit } from "@octokit/rest";
+import { exec } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import util from 'util';
+
+const execPromise = util.promisify(exec);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const octokit = new Octokit();
-
 async function fetchContent(path) {
-  const response = await octokit.repos.getContent({
-    owner: 'vercel',
-    repo: 'ai',
-    path: path,
-  });
-
-  return response.data;
+  const { stdout } = await execPromise(`gh api /repos/vercel/ai/contents/${path}`);
+  return JSON.parse(stdout);
 }
 
 async function scrapeDocs() {
@@ -30,13 +26,9 @@ async function scrapeDocs() {
 
     for (const item of contents) {
       if (item.type === 'file' && item.name.endsWith('.mdx')) {
-        const fileContent = await octokit.repos.getContent({
-          owner: 'vercel',
-          repo: 'ai',
-          path: item.path,
-        });
-
-        const decodedContent = Buffer.from(fileContent.data.content, 'base64').toString('utf-8');
+        const { stdout } = await execPromise(`gh api ${item.url}`);
+        const fileContent = JSON.parse(stdout);
+        const decodedContent = Buffer.from(fileContent.content, 'base64').toString('utf-8');
         const fileName = item.path.replace(/\//g, '_');
         fs.writeFileSync(path.join(saveDir, fileName), decodedContent);
         console.log(`Saved: ${fileName}`);
