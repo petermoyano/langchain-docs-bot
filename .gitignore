@@ -14,3 +14,4 @@ processor/nextjs-docs-raw-data
 /processor/cleaned-docs/
 .venv/
 venv/
+ingestion.log
